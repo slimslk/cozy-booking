@@ -7,10 +7,10 @@ from apps.users.models.user_detail import UserDetail
 
 
 class User(AbstractBaseUser):
-    email: str = models.EmailField(null=False, blank=False)
+    email: str = models.EmailField(unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField()
-    is_deleted: bool = models.BooleanField(default=False, null=False)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_deleted: bool = models.BooleanField(default=False)
     role: str = models.CharField(
         max_length=20,
         null=False,
@@ -18,7 +18,12 @@ class User(AbstractBaseUser):
         choices=UserChoices.choices(),
         default=UserChoices.RENTER,
     )
-    user_detail: UserDetail = models.ForeignKey(UserDetail, related_name='user', on_delete=models.CASCADE)
+    user_detail: UserDetail = models.OneToOneField(
+        UserDetail,
+        null=True,
+        related_name='user',
+        on_delete=models.CASCADE,
+        )
 
     objects = UserManager()
 
@@ -28,3 +33,6 @@ class User(AbstractBaseUser):
 
     class Meta:
         db_table = 'users'
+
+    def __str__(self):
+        return self.email
