@@ -9,3 +9,6 @@ class UserChoices(Enum):
     @classmethod
     def choices(cls) -> list[tuple[str, str]]:
         return [(choice.name, choice.value) for choice in cls]
+
+    def __str__(self):
+        return self.name
