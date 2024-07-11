@@ -27,9 +27,9 @@ class User(AbstractBaseUser):
 
     objects = UserManager()
 
-    USERNAME_FIELD = "email"
+    USERNAME_FIELD = 'email'
 
-    REQUIRED_FIELDS = ['email', 'is_deleted', 'role']
+    REQUIRED_FIELDS = ['is_deleted', 'role']
 
     class Meta:
         db_table = 'users'
