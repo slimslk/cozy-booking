@@ -1,0 +1,6 @@
+PASSWORD_MISMATCH = "The password do not match"
+NO_CONTENT_FOUND = "NO CONTENT"
+NO_ACTIVE_USER_FOUND = "No active account found with the given credentials"
+VALIDATION_ERROR = "Validation Error"
+NO_DATA_TO_UPDATE = "No new data for updating"
+TOKEN_EXPIRED = "Token is expired"

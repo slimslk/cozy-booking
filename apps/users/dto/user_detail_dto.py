@@ -27,8 +27,10 @@ class RequestUserDetailDTO(BaseUserDetailSerializer):
         #TODO: add phone and address validators
         first_name = attrs.get('first_name')
         last_name = attrs.get('last_name')
-        self.__validate_name('first_name', first_name)
-        self.__validate_name('last_name', last_name)
+        if first_name:
+            self.__validate_name('first_name', first_name)
+        if last_name:
+            self.__validate_name('last_name', last_name)
         return attrs
 
     def __validate_name(self, name_type: str, name: str):

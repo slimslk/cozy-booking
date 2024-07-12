@@ -2,6 +2,7 @@ from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 from django.core.exceptions import ValidationError
 
+from apps.users.dto.user_detail_dto import ResponseUserDetailDTO
 from apps.users.errors.user_errors import MismatchedPasswords, IncorrectPasswordError
 from apps.users.models import User
 
@@ -28,21 +29,42 @@ class RequestUserDTO(BaseUserSerializer):
     def validate(self, attrs):
         password = attrs.get('password')
         re_password = attrs.get('re_password')
+
+        if not self.partial:
+            self.__validate_password(attrs)
+        else:
+            if password and re_password:
+                self.__validate_password(attrs)
+
+        if password and re_password:
+            if password != re_password:
+                raise MismatchedPasswords
+
+            try:
+                validate_password(password)
+            except ValidationError as err:
+                raise IncorrectPasswordError(err.messages)
+
+        return attrs
+
+    def __validate_password(self, attrs: dict[str, str]):
+        password = attrs.get('password')
+        re_password = attrs.get('re_password')
+
         if password != re_password:
             raise MismatchedPasswords
-
         try:
             validate_password(password)
         except ValidationError as err:
             raise IncorrectPasswordError(err.messages)
 
-        return attrs
-
 
 class ResponseUserDTO(BaseUserSerializer):
+    user_detail = ResponseUserDetailDTO(required=False, read_only=True)
     class Meta(BaseUserSerializer.Meta):
         fields = [
             'id',
             'email',
-            'role'
+            'role',
+            'user_detail'
         ]

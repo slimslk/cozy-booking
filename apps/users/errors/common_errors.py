@@ -1,6 +1,6 @@
 from rest_framework import status
 
-from apps.users.constants.error_messages import NO_CONTENT_FOUND
+from apps.constants.error_messages import NO_CONTENT_FOUND
 from apps.users.errors.abstract_base_error import AbstractBaseError
 
 
