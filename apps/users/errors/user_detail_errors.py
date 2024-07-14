@@ -1,6 +1,6 @@
 from rest_framework import status
 
-from apps.users.errors.abstract_base_error import AbstractBaseError
+from apps.errors.abstract_base_error import AbstractBaseError
 
 
 class UserDetailBadRequest(AbstractBaseError):

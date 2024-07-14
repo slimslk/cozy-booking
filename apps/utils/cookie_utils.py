@@ -31,3 +31,7 @@ def add_cookie(user: User, response: Response) -> Response:
     )
 
     return response
+
+
+if __name__ == '__main__':
+    pass

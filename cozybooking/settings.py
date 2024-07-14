@@ -44,10 +44,13 @@ INSTALLED_APPS = [
     # 3rd-party
     'rest_framework',
     'rest_framework_simplejwt',
+    # 'django.contrib.staticfiles',
+    'drf_yasg',
 
     # local
     'apps.users.apps.UsersConfig',
     'apps.security.apps.SecurityConfig',
+    'apps.listings.apps.ListingsConfig',
 ]
 
 MIDDLEWARE = [
@@ -133,7 +136,7 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': True,
