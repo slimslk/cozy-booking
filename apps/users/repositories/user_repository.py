@@ -6,7 +6,10 @@ from apps.users.models import User
 class UserRepository:
 
     def get_all_users(self) -> list[User]:
-        users: list[User] = self.__get_users()
+        users: list[User] | User = self.__get_users()
+        if type(users) is User:
+            return [users]
+
         return users
 
     def create_user(self, user_data: dict[str, Any]) -> User:

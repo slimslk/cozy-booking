@@ -1,3 +1,4 @@
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
@@ -5,8 +6,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from apps.users.dto.user_detail_dto import ResponseUserDetailDTO
-from apps.users.errors.abstract_base_error import AbstractBaseError
+from apps.users.dto.user_detail_dto import ResponseUserDetailDTO, RequestUserDetailDTO
+from apps.errors.abstract_base_error import AbstractBaseError
 from apps.users.repositories.user_detail_repository import UserDetailRepository
 from apps.users.services.user_detail_service import UserDetailService
 
@@ -36,6 +37,7 @@ class UserDetailRetrieveCreateDeleteUpdateView(BaseUserDetailView):
                 status=err.status_code
             )
 
+    @swagger_auto_schema(request_body=RequestUserDetailDTO)
     def post(self, request: Request) -> Response:
         try:
             user_data = request.data
@@ -51,6 +53,7 @@ class UserDetailRetrieveCreateDeleteUpdateView(BaseUserDetailView):
                 status=err.status_code
             )
 
+    @swagger_auto_schema(request_body=RequestUserDetailDTO)
     def put(self, request: Request) -> Response:
         try:
             updated_user_detail_data = request.data

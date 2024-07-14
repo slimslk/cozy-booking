@@ -6,11 +6,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.views import TokenObtainPairView
-import rest_framework_simplejwt
 
 from apps.security.errors.security_error import UserNotFoundError
 from apps.security.serializers.user_auth_token_serializatior import UserObtainPairTokenSerializer
-from apps.security.utils.cookie_utils import add_cookie
+from apps.utils.cookie_utils import add_cookie
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
