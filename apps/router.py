@@ -5,5 +5,6 @@ from apps.listings.controller.listing_controller import ApartmentListByUserIdVie
 urlpatterns = [
     path('users/', include('apps.users.router')),
     path('listings/', include('apps.listings.router')),
+    path('bookings/', include('apps.reservations.urls')),
     path('users/listings/', ApartmentListByUserIdView.as_view()),  # TODO: Refactor this?
 ]

@@ -1,6 +1,6 @@
 from rest_framework.permissions import BasePermission
 
-from apps.users.choices.user_choices import UserChoices
+from apps.users.choices.user_choices import RoleChoices
 
 
 class IsAdmin(BasePermission):
@@ -8,7 +8,7 @@ class IsAdmin(BasePermission):
         return bool(
             request.user and
             request.user.is_authenticated and
-            request.user.role == UserChoices.ADMIN.name
+            request.user.role == RoleChoices.ADMIN.name
         )
 
 
@@ -17,7 +17,7 @@ class IsRenter(BasePermission):
         return bool(
             request.user and
             request.user.is_authenticated and
-            request.user.role == UserChoices.RENTER.name
+            request.user.role == RoleChoices.RENTER.name
         )
 
 
@@ -26,5 +26,5 @@ class IsLessor(BasePermission):
         return bool(
             request.user and
             request.user.is_authenticated and
-            request.user.role == UserChoices.LESSOR.name
+            request.user.role == RoleChoices.LESSOR.name
         )

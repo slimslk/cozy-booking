@@ -37,7 +37,7 @@ class Migration(migrations.Migration):
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField()),
                 ('is_deleted', models.BooleanField(default=False)),
-                ('role', models.CharField(choices=[('ADMIN', 'admin'), ('LESSOR', 'lessor'), ('RENTER', 'renter')], default=apps.users.choices.user_choices.UserChoices['RENTER'], max_length=20)),
+                ('role', models.CharField(choices=[('ADMIN', 'admin'), ('LESSOR', 'lessor'), ('RENTER', 'renter')], default=apps.users.choices.user_choices.RoleChoices['RENTER'], max_length=20)),
                 ('user_detail', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='user', to='users.userdetail')),
             ],
             options={
