@@ -21,7 +21,7 @@ from apps.listings.errors.listings_errors import ListingDataValidationError
 from apps.listings.models import Apartment
 from apps.listings.repositories.listing_repository import ListingRepository
 from apps.security.errors.security_error import PermissionDeniedError
-from apps.users.choices.user_choices import UserChoices
+from apps.users.choices.user_choices import RoleChoices
 from apps.users.models import User
 from apps.utils import content_utils
 from apps.utils.content_utils import check_and_update_entity_with_new_data_helper
@@ -116,7 +116,7 @@ class ListingService:
             raise ListingDataValidationError(err=err.args[0])
 
     def __check_has_user_permissions(self, user: User, apartment: Apartment):
-        if apartment.user_id != user.id and user.role != UserChoices.ADMIN.name:
+        if apartment.user_id != user.id and user.role != RoleChoices.ADMIN.name:
             raise PermissionDeniedError()
 
     def __check_and_update_apartment(self, apartment: Apartment, updated_data: dict[str, Any]) -> Apartment:

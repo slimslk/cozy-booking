@@ -9,3 +9,7 @@ USER_HAS_NOT_USER_DETAIL = "The User has not a user detail. Create a new one bef
 NOT_A_NUMBER = "The query parameter should be a positive number"
 NOT_IN_APARTMENT_CHOICES = "Not in the apartment choices"
 POSITIVE_NUMBER = "The page number parameter should be a positive number"
+START_DATE_GREATER_END_DATE = "The start date should be greater than end date"
+DATE_IS_OCCUPIED = "Selected dates are occupied"
+DATE_IN_PAST = "Selected dates are in the past"
+PENDING_STATUS = "Status cannot be changed to pending"

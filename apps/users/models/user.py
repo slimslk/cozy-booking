@@ -2,7 +2,7 @@ from django.contrib.auth.models import UserManager
 from django.db import models
 from django.contrib.auth.base_user import AbstractBaseUser
 
-from apps.users.choices.user_choices import UserChoices
+from apps.users.choices.user_choices import RoleChoices
 from apps.users.models.user_detail import UserDetail
 
 
@@ -15,8 +15,8 @@ class User(AbstractBaseUser):
         max_length=20,
         null=False,
         blank=False,
-        choices=UserChoices.choices(),
-        default=UserChoices.RENTER,
+        choices=RoleChoices.choices(),
+        default=RoleChoices.RENTER,
     )
     user_detail: UserDetail = models.OneToOneField(
         UserDetail,

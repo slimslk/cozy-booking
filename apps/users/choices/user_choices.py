@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class UserChoices(Enum):
+class RoleChoices(Enum):
     ADMIN = 'admin'
     LESSOR = 'lessor'
     RENTER = 'renter'
