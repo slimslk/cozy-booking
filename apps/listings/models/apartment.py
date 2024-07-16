@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Avg
 
 from apps.listings.choices.appartment_type_choices import ApartmentTypeChoice
 from apps.listings.models.address import Address
@@ -24,6 +25,10 @@ class Apartment(models.Model):
     user_id = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
+
+    @property
+    def rating(self):
+        return self.reviews.aggregate(rating=Avg('rating'))['rating'] or 0
 
     class Meta:
         db_table = 'apartments'

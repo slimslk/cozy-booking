@@ -42,18 +42,29 @@ class ListingRepository:
         order: str = kwargs.pop('order', '-created_at')
         location: str | None = kwargs.pop('location', '')
         search = kwargs.pop('search', '')
-
         page_size = int(kwargs.pop('page_size', DEFAULT_PAGE_SIZE))
+        page = (int(kwargs.pop('page', 1)) - 1) * page_size
+
         if page_size > MAX_PAGE_SIZE:
             page_size = MAX_PAGE_SIZE
-        if page := (int(kwargs.pop('page', 1)) - 1) * page_size < 0:
+        if page < 0:
             raise PageParameterError()
 
-        apartments = Apartment.objects.filter(
-            Q(title__icontains=search) | Q(description__icontains=search),
-            Q(address__city__icontains=location) | Q(address__land__icontains=location),
-            **kwargs
-        ).order_by(order)[page:page_size + page]
+        location_query = Q(address__city__icontains=location) | Q(address__land__icontains=location)
+        title_and_description_query = Q(title__icontains=search) | Q(description__icontains=search)
+
+        if location:
+            apartments = Apartment.objects.filter(
+                title_and_description_query,
+                location_query,
+                **kwargs
+            ).order_by(order)[page:page_size + page]
+        else:
+            apartments = Apartment.objects.filter(
+                title_and_description_query,
+                **kwargs
+            ).order_by(order)[page:page_size + page]
+
         if len(apartments) < 2:
             return apartments.first()
         return apartments.all()

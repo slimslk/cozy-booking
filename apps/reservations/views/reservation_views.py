@@ -1,3 +1,4 @@
+from django.db.models import Q
 from rest_framework.generics import (
     ListCreateAPIView,
     RetrieveUpdateDestroyAPIView
@@ -41,11 +42,17 @@ class ReservationUpdateRetrieveDeleteView(RetrieveUpdateDestroyAPIView):
         user: User = self.request.user
         if user.role == RoleChoices.ADMIN.name:
             return Reservation.objects.filter(pk=pk)
+        if self.request.method in ["PUT"]:
+            return Reservation.objects.filter(
+                Q(pk=pk) &
+                Q(user_id=user.id) |
+                Q(listing__user_id=user.id)
+            )
         return Reservation.objects.filter(pk=pk, user_id=user.id)
 
     def get_permissions(self):
         if self.request.method in ["PUT"]:
-            return [permission() for permission in [IsAdmin | IsLessor]]
+            return [permission() for permission in [IsAdmin | IsLessor | IsRenter]]
         elif self.request.method in ["DELETE"]:
             return [IsAdmin()]
         return [permission() for permission in [IsAdmin | IsLessor | IsRenter]]

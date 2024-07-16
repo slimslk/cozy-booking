@@ -14,7 +14,7 @@ CREATED_AT_ASC_RANK = ('created_at_asc', 'created_at')
 CREATED_AT_DESC_RANK = ('created_at_desc', '-created_at')
 
 # pagination
-DEFAULT_PAGE_SIZE = 2
+DEFAULT_PAGE_SIZE = 10
 MAX_PAGE_SIZE = 100
 PAGE = 'page'
 PAGE_SIZE = 'page_size'
