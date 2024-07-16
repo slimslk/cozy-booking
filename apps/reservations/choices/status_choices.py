@@ -6,6 +6,7 @@ class StatusChoices(Enum):
     REJECTED = 'Rejected'
     PENDING = 'Pending'
     CHECKED_IN = 'Checked in'
+    CANCELED = 'Canceled'
 
     @classmethod
     def choices(cls):

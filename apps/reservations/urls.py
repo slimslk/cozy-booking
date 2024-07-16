@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 
 from apps.reservations.views.reservation_views import (
     ReservationListCreateView,
@@ -7,5 +7,6 @@ from apps.reservations.views.reservation_views import (
 
 urlpatterns = [
     path('', ReservationListCreateView.as_view()),
-    path('<int:pk>/', ReservationUpdateRetrieveDeleteView.as_view())
+    path('<int:pk>/', ReservationUpdateRetrieveDeleteView.as_view()),
+    path('<int:pk>/', include('apps.reviews.rate_urls')),
 ]

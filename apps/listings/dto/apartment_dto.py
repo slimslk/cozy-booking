@@ -1,6 +1,6 @@
-from rest_framework.serializers import ModelSerializer
+from rest_framework.serializers import ModelSerializer, ReadOnlyField
 
-from apps.listings.dto.address_dto import ResponseAddressDTO
+from apps.listings.dto.address_dto import ResponseAddressDTO, RequestAddressDTO
 from apps.listings.models.apartment import Apartment
 
 
@@ -14,6 +14,8 @@ class BaseApartmentSerializer(ModelSerializer):
 
 class RequestApartmentDTO(BaseApartmentSerializer):
 
+    # address = RequestAddressDTO(write_only=True, required=False)
+
     class Meta(BaseApartmentSerializer.Meta):
         fields = '__all__'
 
@@ -21,6 +23,7 @@ class RequestApartmentDTO(BaseApartmentSerializer):
 class ResponseApartmentDTO(BaseApartmentSerializer):
 
     address = ResponseAddressDTO(read_only=True, required=False)
+    rating = ReadOnlyField()
 
     class Meta(BaseApartmentSerializer.Meta):
         fields = '__all__'

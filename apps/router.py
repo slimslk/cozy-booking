@@ -7,4 +7,5 @@ urlpatterns = [
     path('listings/', include('apps.listings.router')),
     path('bookings/', include('apps.reservations.urls')),
     path('users/listings/', ApartmentListByUserIdView.as_view()),  # TODO: Refactor this?
+    path('reviews/', include('apps.reviews.urls')),
 ]

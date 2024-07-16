@@ -10,6 +10,7 @@ class BaseAddressSerializer(serializers.ModelSerializer):
         abstract = True
         fields = '__all__'
 
+
 class AddressSerializer(serializers.Serializer):
     land = serializers.ChoiceField(choices=LandChoice.choices())
     city = serializers.CharField(max_length=50)

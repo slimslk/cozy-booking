@@ -7,14 +7,12 @@ from apps.listings.choices.appartment_type_choices import ApartmentTypeChoice
 from apps.listings.constants.filter_and_order_constants import (
     FILTER_LIST_AND_PAGINATION,
     ORDER_LIST,
-    PRICE_MIN,
-    PRICE_MAX,
     CREATED_AT_DESC_RANK,
     ORDER_PARAMETER,
-    ROOMS,
     APARTMENT_TYPE,
-    PAGE,
-    PAGE_SIZE, VALUE_AS_NUMBER_LIST
+    VALUE_AS_NUMBER_LIST,
+    PRICE_MIN,
+    PRICE_MAX
 )
 from apps.listings.dto.apartment_dto import ResponseApartmentDTO, RequestApartmentDTO
 from apps.listings.errors.listings_errors import ListingDataValidationError
@@ -84,6 +82,9 @@ class ListingService:
         apartment = self.update_apartment(apartment=apartment, updated_data=updated_data)
         return ResponseApartmentDTO(apartment)
 
+    def get_apartment_rating(self, apartment: Apartment) -> int:
+        pass
+
     # +++++++++++++++++++++++++++++++++++++++++++++++++
     def get_apartment_as_model(self, **kwargs) -> Apartment | list[Apartment]:
         apartment_id = kwargs.get('apartment_id')
@@ -138,6 +139,12 @@ class ListingService:
             if key in FILTER_LIST_AND_PAGINATION:
                 if key in VALUE_AS_NUMBER_LIST:
                     self.__check_is_number(value[0])
+                    if key == PRICE_MIN:
+                        listing_filter['price__gte'] = value[0]
+                        continue
+                    if key == PRICE_MAX:
+                        listing_filter['price__lte'] = value[0]
+                        continue
                     listing_filter[key] = value[0]
                 elif key == APARTMENT_TYPE:
                     self.__check_is_in_apartment_choices(value[0])

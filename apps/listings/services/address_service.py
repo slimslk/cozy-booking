@@ -36,7 +36,19 @@ class AddressService:
             if serializer.is_valid(raise_exception=True):
                 with transaction.atomic():
                     address: Address = self.get_or_create_address(serializer.validated_data)
-                    updated_apartment_data = {'address': address.id}
+                    # updated_apartment_data = {
+                    #     'address': {
+                    #         "id": address.id,
+                    #         "land": address.land,
+                    #         "city": address.city,
+                    #         "street": address.street,
+                    #         "house_number": address.house_number,
+                    #         "postal_code": address.postal_code
+                    #     }
+                    # }
+                    updated_apartment_data = {
+                        'address': address.id
+                    }
                     self.__listing_service.update_apartment(apartment=apartment, updated_data=updated_apartment_data)
                 return ResponseAddressDTO(address)
 
@@ -44,7 +56,7 @@ class AddressService:
             raise ListingDataValidationError(err.args[0])
 
     def update_address(self, apartment_id: int, address_data: dict[str, Any]) -> ResponseAddressDTO:
-        address: Address = self.__listing_service.get_apartments_by_id(apartment_id).data.get('address')
+        address: Address = self.__listing_service.get_apartment_as_model(apartment_id=apartment_id).address
         content_utils.check_content_helper(address)
         serializer = RequestAddressDTO(instance=address, data=address_data, partial=True)
 
