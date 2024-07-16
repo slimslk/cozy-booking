@@ -65,7 +65,8 @@ class ApartmentRetrieveUpdateDelete(BaseApartmentView):
 
     def get(self, request: Request, apartment_id: int) -> Response:
         try:
-            apartment = self._listing_service.get_apartments_by_id(apartment_id)
+            user_id = self.request.user.id
+            apartment = self._listing_service.get_apartments_by_id(apartment_id, user_id=user_id)
             return Response(
                 data=apartment.data,
                 status=status.HTTP_200_OK

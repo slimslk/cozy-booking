@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import Avg
+from django.db.models import Avg, Count
 
 from apps.listings.choices.appartment_type_choices import ApartmentTypeChoice
 from apps.listings.models.address import Address
@@ -29,6 +29,10 @@ class Apartment(models.Model):
     @property
     def rating(self):
         return self.reviews.aggregate(rating=Avg('rating'))['rating'] or 0
+
+    @property
+    def views(self):
+        return self.listing_views.aggregate(views=Count('id'))['views'] or 0
 
     class Meta:
         db_table = 'apartments'

@@ -24,6 +24,7 @@ class ResponseApartmentDTO(BaseApartmentSerializer):
 
     address = ResponseAddressDTO(read_only=True, required=False)
     rating = ReadOnlyField()
+    views = ReadOnlyField()
 
     class Meta(BaseApartmentSerializer.Meta):
         fields = '__all__'

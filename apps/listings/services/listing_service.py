@@ -3,11 +3,12 @@ from typing import Any
 from rest_framework import serializers
 
 from apps.constants.error_messages import NOT_A_NUMBER, NOT_IN_APARTMENT_CHOICES
+from apps.listing_views.services.listing_views_services import ListingViewsService
 from apps.listings.choices.appartment_type_choices import ApartmentTypeChoice
 from apps.listings.constants.filter_and_order_constants import (
     FILTER_LIST_AND_PAGINATION,
     ORDER_LIST,
-    CREATED_AT_DESC_RANK,
+    VIEWS_DESC_RANK,
     ORDER_PARAMETER,
     APARTMENT_TYPE,
     VALUE_AS_NUMBER_LIST,
@@ -27,9 +28,12 @@ from apps.utils.content_utils import check_and_update_entity_with_new_data_helpe
 
 class ListingService:
 
-    def __init__(self, listing_repository: ListingRepository = ListingRepository()):
+    def __init__(
+            self, listing_repository: ListingRepository = ListingRepository(),
+            listing_views_service: ListingViewsService = ListingViewsService(),
+    ):
         self.__listing_repository = listing_repository
-
+        self.__listing_views_service = listing_views_service
     def get_all_apartments(self, *args, **kwargs) -> list[dict]:
         filters: dict[str, Any] = {}
         order: str = ""
@@ -59,8 +63,13 @@ class ListingService:
             apartment = self.__listing_repository.creat_apartment(apartment_data)
             return ResponseApartmentDTO(apartment)
 
-    def get_apartments_by_id(self, apartment_id: int) -> ResponseApartmentDTO:
+    def get_apartments_by_id(self, apartment_id: int, **kwargs) -> ResponseApartmentDTO:
         apartment = self.get_apartment_as_model(apartment_id=apartment_id)
+        user = kwargs.get('user_id')
+        view_data = {'listing': apartment.id}
+        if user:
+            view_data['user'] = user.id
+        self.__listing_views_service.add_view(**view_data)
         content_utils.check_content_helper(apartment)
         apartment_response = ResponseApartmentDTO(apartment)
         return apartment_response
@@ -91,13 +100,17 @@ class ListingService:
         user_id = kwargs.get('user_id')
         filters = kwargs.get('filters')
         order = kwargs.get('order')
+
         if user_id:
             apartment = self.__listing_repository.get_all_apartment_by_user_id(user_id)
+
         elif apartment_id:
             apartment = self.__listing_repository.get_apartment_by_id(apartment_id)
+
         else:
             apartment = self.__listing_repository.get_all_apartments(**filters, order=order)
         content_utils.check_content_helper(apartment)
+
         return apartment
 
     def update_apartment(self, apartment: Apartment, updated_data: dict[str, Any]) -> Apartment:
@@ -131,24 +144,30 @@ class ListingService:
         return {}
 
     def __get_popular_orders_request(self) -> dict[str: Any]:
-        return CREATED_AT_DESC_RANK[1]
+        return VIEWS_DESC_RANK[1]
 
     def __get_filter(self, request_parameters: dict[str, Any]) -> dict[str, Any]:
         listing_filter: dict[str, Any] = {}
         for key, value in request_parameters.items():
+
             if key in FILTER_LIST_AND_PAGINATION:
+
                 if key in VALUE_AS_NUMBER_LIST:
                     self.__check_is_number(value[0])
+
                     if key == PRICE_MIN:
                         listing_filter['price__gte'] = value[0]
                         continue
                     if key == PRICE_MAX:
                         listing_filter['price__lte'] = value[0]
                         continue
+
                     listing_filter[key] = value[0]
+
                 elif key == APARTMENT_TYPE:
                     self.__check_is_in_apartment_choices(value[0])
                     listing_filter[key] = value[0]
+
                 else:
                     listing_filter[key] = value[0]
         return listing_filter
