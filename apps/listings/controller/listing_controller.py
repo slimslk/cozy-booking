@@ -26,6 +26,63 @@ class ApartmentListCreateView(BaseApartmentView):
         if self.request.method in ["POST"]:
             return [permission() for permission in [IsAdmin | IsLessor]]
 
+    @swagger_auto_schema(
+        operation_description='Get All Listings',
+        tags=['Listings'],
+        manual_parameters=[
+            openapi.Parameter(
+                'search', openapi.IN_QUERY,
+                description="Search by title or description", type=openapi.TYPE_STRING
+            ),
+            openapi.Parameter(
+                'price_min', openapi.IN_QUERY,
+                description="Set min price", type=openapi.TYPE_NUMBER
+            ),
+            openapi.Parameter(
+                'price_max', openapi.IN_QUERY,
+                description="Set max price", type=openapi.TYPE_NUMBER
+            ),
+            openapi.Parameter(
+                'location', openapi.IN_QUERY,
+                description="Search by land or city", type=openapi.TYPE_STRING
+            ),
+            openapi.Parameter(
+                'rooms', openapi.IN_QUERY,
+                description="Search by amount of rooms", type=openapi.TYPE_NUMBER
+            ),
+            openapi.Parameter(
+                'apartment_type', openapi.IN_QUERY,
+                enum=[
+                    'Hotel',
+                    'House',
+                    'Apartment',
+                    'Flat',
+                    'Hostel',
+                    'Guest_house',
+                ],
+                required=False,
+                description="Search by apartment type", type=openapi.TYPE_STRING
+            ),
+            openapi.Parameter(
+                'order', openapi.IN_QUERY,
+                required=False,
+                enum=[
+                    'price_asc',
+                    'price_desc',
+                    'created_at_asc',
+                    'created_at_desc',
+                    'views_asc',
+                    'views_desc',
+                    'rating_asc',
+                    'rating_desc',
+                    'popular_asc',
+                    'popular_desc',
+                ],
+                description="Ordering by price, created date, amount of the views, rating, popular search criteria",
+                type=openapi.TYPE_STRING
+            ),
+        ]
+    )
     def get(self, request: Request) -> Response:
         query_parameters = request.query_params
         try:
@@ -41,18 +98,9 @@ class ApartmentListCreateView(BaseApartmentView):
             )
 
     @swagger_auto_schema(
+        operation_description='Create new listing (only for user with role lesson and admin)',
         request_body=RequestApartmentDTO,
         tags=['Listings'],
-        # manual_parameters=[
-        #  openapi.Parameter(
-        #      'search', openapi.IN_QUERY,
-        #      description="Search by name", type=openapi.TYPE_STRING
-        #  ),
-        #  openapi.Parameter(
-        #      'ordering', openapi.IN_QUERY,
-        #      description="Ordering by created_at", type=openapi.TYPE_STRING
-        #  ),
-        # ]
     )
     def post(self, request: Request) -> Response:
         try:
@@ -77,6 +125,10 @@ class ApartmentRetrieveUpdateDelete(BaseApartmentView):
         if self.request.method in ["PUT", "DELETE", "PATCH"]:
             return [permission() for permission in [IsAdmin | IsLessor]]
 
+    @swagger_auto_schema(
+        tags=['Listings'],
+        operation_description='Get listings by id',
+    )
     def get(self, request: Request, apartment_id: int) -> Response:
         try:
             user_id = self.request.user.id
@@ -91,20 +143,11 @@ class ApartmentRetrieveUpdateDelete(BaseApartmentView):
                 status=err.status_code
             )
 
-    def delete(self, request: Request, apartment_id: int) -> Response:
-        try:
-            self._listing_service.delete_apartments_by_id(request.user, apartment_id)
-            return Response(
-                data={"message": "Deleted successfully"},
-                status=status.HTTP_200_OK
-            )
-        except AbstractBaseError as err:
-            return Response(
-                data=err.data,
-                status=err.status_code
-            )
-
-    @swagger_auto_schema(request_body=RequestApartmentDTO)
+    @swagger_auto_schema(
+        request_body=RequestApartmentDTO,
+        tags=['Listings'],
+        operation_description='Update listing by id',
+    )
     def put(self, request: Request, apartment_id: int):
         try:
             apartment = self._listing_service.update_apartment_by_id(user=request.user,
@@ -120,10 +163,31 @@ class ApartmentRetrieveUpdateDelete(BaseApartmentView):
                 status=err.status_code
             )
 
+    @swagger_auto_schema(
+        tags=['Listings'],
+        operation_description='Delete listing by id (only the user who add this listing is allowed to delete)',
+    )
+    def delete(self, request: Request, apartment_id: int) -> Response:
+        try:
+            self._listing_service.delete_apartments_by_id(request.user, apartment_id)
+            return Response(
+                data={"message": "Deleted successfully"},
+                status=status.HTTP_200_OK
+            )
+        except AbstractBaseError as err:
+            return Response(
+                data=err.data,
+                status=err.status_code
+            )
+
 
 class ApartmentListByUserIdView(BaseApartmentView):
     permission_classes = [IsAdmin | IsLessor]
 
+    @swagger_auto_schema(
+        tags=['Listings'],
+        operation_description="Get all listings added by a user"
+    )
     def get(self, request: Request) -> Response:
         try:
             apartments = self._listing_service.get_all_apartments_by_user_id(request.user.id)

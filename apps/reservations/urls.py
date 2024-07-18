@@ -7,7 +7,6 @@ from apps.reservations.views.reservation_views import (
 
 urlpatterns = [
     path('', ReservationListCreateView.as_view()),
-    # path('lessor/', ReservationListByLessorView.as_view()),
     path('<int:pk>/', ReservationUpdateRetrieveDeleteView.as_view()),
     path('<int:pk>/', include('apps.reviews.for_booking_urls')),
 ]

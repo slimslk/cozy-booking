@@ -64,7 +64,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'apps.security.middlewares.jwt_token_middleware.JWTAuthMiddleware',
+    'apps.middlewares.jwt_token_middleware.JWTAuthMiddleware',
+    'apps.middlewares.anonymous_user_middleware.CustomAnonymousUserMiddleware'
 ]
 
 ROOT_URLCONF = 'cozybooking.urls'
@@ -88,7 +89,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'cozybooking.wsgi.application'
-
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
@@ -135,8 +135,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-            'rest_framework_simplejwt.authentication.JWTAuthentication',
-        ],
+        'apps.security.authentications.authentication.CustomJWTAuthentication',
+    ],
 }
 
 SIMPLE_JWT = {
@@ -149,6 +149,14 @@ SIMPLE_JWT = {
 SWAGGER_SETTINGS = {
     'DEFAULT_INFO': 'cozybooking.urls',
     'DEFAULT_AUTO_SCHEMA_CLASS': 'drf_yasg.inspectors.SwaggerAutoSchema',
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header'
+        }
+    },
+    'USE_SESSION_AUTH': False,
 }
 
 # Internationalization

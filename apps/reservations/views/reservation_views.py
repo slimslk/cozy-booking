@@ -1,7 +1,7 @@
 from django.db.models import Q
 from rest_framework.generics import (
     ListCreateAPIView,
-    RetrieveUpdateDestroyAPIView, ListAPIView
+    RetrieveUpdateDestroyAPIView
 )
 
 from apps.reservations.models import Reservation

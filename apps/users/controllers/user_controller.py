@@ -29,6 +29,9 @@ class UserCRUDView(BaseUserView):
         if self.request.method in ["PUT", "DELETE", "GET"]:
             return [permission() for permission in [IsAdmin | IsLessor | IsRenter]]
 
+    @swagger_auto_schema(
+        tags=['Users'],
+        operation_description='Get User')
     def get(self, request: Request):
         try:
             user: ResponseUserDTO = self._user_service.get_user_by_id(request.user.id)
@@ -42,7 +45,11 @@ class UserCRUDView(BaseUserView):
                 status=err.status_code
             )
 
-    @swagger_auto_schema(request_body=RequestUserDTO)
+    @swagger_auto_schema(
+        request_body=RequestUserDTO,
+        tags=['Users'],
+        operation_description='Create new user'
+    )
     def post(self, request: Request) -> Response:
         try:
             user_data = request.data
@@ -57,7 +64,11 @@ class UserCRUDView(BaseUserView):
                 status=err.status_code
             )
 
-    @swagger_auto_schema(request_body=RequestUserDTO)
+    @swagger_auto_schema(
+        request_body=RequestUserDTO,
+        tags=['Users'],
+        operation_description='Update user'
+    )
     def put(self, request: Request):
         try:
             updated_user_data = request.data
@@ -72,6 +83,11 @@ class UserCRUDView(BaseUserView):
                 status=err.status_code
             )
 
+    @swagger_auto_schema(
+        request_body=RequestUserDTO,
+        tags=['Users'],
+        operation_description='Soft delete user'
+    )
     def delete(self, request: Request):
         try:
             self._user_service.soft_delete_user_by_id(request.user.id)
@@ -97,6 +113,10 @@ class UserCRUDView(BaseUserView):
 class UserListView(BaseUserView):
     permission_classes = [IsAdmin]
 
+    @swagger_auto_schema(
+        tags=['Users'],
+        operation_description='Get all users (only for an administrator)'
+    )
     def get(self, request: Request) -> Response:
         try:
             users: list[dict] = self._user_service.get_all_users()

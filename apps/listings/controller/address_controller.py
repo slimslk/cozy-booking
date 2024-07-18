@@ -24,6 +24,7 @@ class ApartmentCRUDView(BaseAddressView):
         if self.request.method in ["POST", "PUT", "DELETE", "PATCH"]:
             return [permission() for permission in [IsAdmin | IsLessor]]
 
+    @swagger_auto_schema(tags=['Address'])
     def get(self, request: Request, apartment_id: int) -> Response:
         try:
             address = self._address_service.get_address(apartment_id)
@@ -37,7 +38,10 @@ class ApartmentCRUDView(BaseAddressView):
                 status=err.status_code
             )
 
-    @swagger_auto_schema(request_body=AddressSerializer)
+    @swagger_auto_schema(
+        request_body=AddressSerializer,
+        tags=['Address']
+    )
     def post(self, request: Request, apartment_id: int) -> Response:
         try:
             address_data = request.data
@@ -53,6 +57,7 @@ class ApartmentCRUDView(BaseAddressView):
                 status=err.status_code
             )
 
+    @swagger_auto_schema(tags=['Address'])
     def delete(self, request: Request, apartment_id: int) -> Response:
         try:
             self._address_service.delete_address(apartment_id)
@@ -66,7 +71,7 @@ class ApartmentCRUDView(BaseAddressView):
                 status=err.status_code
             )
 
-    @swagger_auto_schema(request_body=RequestAddressDTO)
+    @swagger_auto_schema(request_body=RequestAddressDTO, tags=['Address'])
     def put(self, request: Request, apartment_id: int):
         try:
             address: ResponseAddressDTO = self._address_service.update_address(

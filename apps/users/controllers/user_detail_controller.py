@@ -21,6 +21,10 @@ class BaseUserDetailView(APIView):
 class UserDetailRetrieveCreateDeleteUpdateView(BaseUserDetailView):
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(
+        tags=['User Details'],
+        operation_description='Get details of the user'
+    )
     def get(self, request: Request) -> Response:
         try:
             user_id = request.user.id
@@ -35,7 +39,11 @@ class UserDetailRetrieveCreateDeleteUpdateView(BaseUserDetailView):
                 status=err.status_code
             )
 
-    @swagger_auto_schema(request_body=RequestUserDetailDTO)
+    @swagger_auto_schema(
+        request_body=RequestUserDetailDTO,
+        tags=['User Details'],
+        operation_description='Create user details'
+    )
     def post(self, request: Request) -> Response:
         try:
             user_data = request.data
@@ -51,7 +59,11 @@ class UserDetailRetrieveCreateDeleteUpdateView(BaseUserDetailView):
                 status=err.status_code
             )
 
-    @swagger_auto_schema(request_body=RequestUserDetailDTO)
+    @swagger_auto_schema(
+        request_body=RequestUserDetailDTO,
+        tags=['User Details'],
+        operation_description='Update user details'
+    )
     def put(self, request: Request) -> Response:
         try:
             updated_user_detail_data = request.data

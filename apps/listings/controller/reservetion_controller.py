@@ -1,3 +1,4 @@
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -16,6 +17,9 @@ class ReservationController(APIView):
 
     __reservation_service = ReservationService()
 
+    @swagger_auto_schema(
+        tags=['Listings'],
+        operation_description='Get all bookings related to user listings')
     def get(self, request: Request) -> Response:
 
         try:

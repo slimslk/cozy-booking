@@ -1,4 +1,4 @@
-from django.contrib.auth.models import UserManager
+from django.contrib.auth.models import UserManager, AnonymousUser
 from django.db import models
 from django.contrib.auth.base_user import AbstractBaseUser
 
@@ -36,3 +36,10 @@ class User(AbstractBaseUser):
 
     def __str__(self):
         return self.email
+
+
+class CustomAnonymousUser(AnonymousUser):
+    role = RoleChoices.RENTER.name
+    is_deleted = False
+    email = ""
+    user_detail = None
