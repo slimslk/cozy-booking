@@ -2,17 +2,17 @@ from rest_framework import status
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from apps.errors.abstract_base_error import AbstractBaseError
 from apps.listings.services.reservation_service import ReservationService
+from apps.security.authentications.authentication import CustomJWTAuthentication
 from apps.security.permissions.user_permission import IsAdmin, IsLessor
 from apps.users.choices.user_choices import RoleChoices
 
 
 class ReservationController(APIView):
     permission_classes = [IsAdmin | IsLessor]
-    authentication_classes = [JWTAuthentication]
+    authentication_classes = [CustomJWTAuthentication]
 
     __reservation_service = ReservationService()
 
@@ -35,4 +35,3 @@ class ReservationController(APIView):
                 data=err.data,
                 status=err.status_code
             )
-

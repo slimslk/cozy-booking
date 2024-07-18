@@ -57,13 +57,13 @@ class JWTAuthMiddleware(MiddlewareMixin):
         return response
 
     def refresh_access_token(self, refresh_token):
-        # try:
-        refresh = RefreshToken(refresh_token)
-        new_access_token = str(refresh.access_token)
+        try:
+            refresh = RefreshToken(refresh_token)
+            new_access_token = str(refresh.access_token)
 
-        return new_access_token
-        # except TokenError:
-        #     return None
+            return new_access_token
+        except TokenError:
+            raise TokenError()
 
     def remove_jwt_cookies(self, request: Request):
         request.COOKIES.pop('access_token', None)

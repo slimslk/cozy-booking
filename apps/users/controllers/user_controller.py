@@ -1,11 +1,12 @@
+from django.contrib.auth import logout
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.request import Request
 from rest_framework.views import APIView
-from rest_framework_simplejwt.authentication import JWTAuthentication
 
+from apps.security.authentications.authentication import CustomJWTAuthentication
 from apps.security.permissions.user_permission import IsAdmin, IsRenter, IsLessor
 from apps.users.dto.user_dto import ResponseUserDTO, RequestUserDTO
 from apps.errors.abstract_base_error import AbstractBaseError
@@ -16,7 +17,7 @@ from apps.users.services.user_service import UserService
 class BaseUserView(APIView):
     _user_repository = UserRepository()
     _user_service: UserService = UserService(user_repository=_user_repository)
-    authentication_classes = [JWTAuthentication]
+    authentication_classes = [CustomJWTAuthentication]
 
 
 class UserCRUDView(BaseUserView):
@@ -74,10 +75,18 @@ class UserCRUDView(BaseUserView):
     def delete(self, request: Request):
         try:
             self._user_service.soft_delete_user_by_id(request.user.id)
-            return Response(
-                data={},
-                status=status.HTTP_200_OK,
+
+            logout(request)
+
+            response = Response(
+                data={'message': 'user deleted'},
+                status=status.HTTP_200_OK
             )
+
+            response.delete_cookie('access_token')
+            response.delete_cookie('refresh_token')
+
+            return response
         except AbstractBaseError as err:
             return Response(
                 data=err.data,
@@ -100,3 +109,4 @@ class UserListView(BaseUserView):
                 data=err.data,
                 status=err.status_code
             )
+

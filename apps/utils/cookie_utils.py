@@ -1,17 +1,19 @@
 from datetime import datetime
 
 from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import RefreshToken, Token
+from rest_framework_simplejwt.tokens import RefreshToken, Token, AccessToken
 
 from apps.users.models import User
 
 
 def add_cookie(user: User, response: Response) -> Response:
-    refresh_token: Token = RefreshToken.for_user(user)
-    access_token: Token = refresh_token.access_token
+    refresh_token: Token = response.data['refresh']
+    access_token: Token = response.data['access']
 
-    access_token_expire = datetime.fromtimestamp(access_token['exp'])
-    refresh_token_expire = datetime.fromtimestamp(access_token['exp'])
+    token = AccessToken(access_token)
+    access_token_expire = datetime.fromtimestamp(token['exp'])
+    token = RefreshToken(refresh_token)
+    refresh_token_expire = datetime.fromtimestamp(token['exp'])
 
     response.set_cookie(
         key='access_token',

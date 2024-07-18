@@ -8,6 +8,7 @@ from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from apps.security.errors.security_error import UserNotFoundError
+from apps.security.models.token_blacklist import Blacklist
 from apps.security.serializers.user_auth_token_serializatior import UserObtainPairTokenSerializer
 from apps.utils.cookie_utils import add_cookie
 
@@ -38,7 +39,10 @@ class UserLogoutView(APIView):
     def post(self, request: Request) -> Response:
         if request.user and request.user.is_authenticated:
             logout(request)
-
+        access_token = request.COOKIES.get('access_token')
+        refresh_token = request.COOKIES.get('refresh_token')
+        if access_token and refresh_token:
+            Blacklist.objects.create(access_token=access_token, refresh_token=refresh_token)
         response = Response(status=status.HTTP_200_OK)
 
         response.delete_cookie('access_token')

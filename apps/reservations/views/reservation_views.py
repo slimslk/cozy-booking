@@ -1,9 +1,8 @@
 from django.db.models import Q
 from rest_framework.generics import (
     ListCreateAPIView,
-    RetrieveUpdateDestroyAPIView
+    RetrieveUpdateDestroyAPIView, ListAPIView
 )
-from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from apps.reservations.models import Reservation
 from apps.reservations.serializers.resirvation_serializers import (
@@ -11,6 +10,7 @@ from apps.reservations.serializers.resirvation_serializers import (
     ReservationResponseSerializer,
     ReservationCreateSerializer,
 )
+from apps.security.authentications.authentication import CustomJWTAuthentication
 from apps.security.permissions.user_permission import IsAdmin, IsRenter, IsLessor
 from apps.users.choices.user_choices import RoleChoices
 from apps.users.models import User
@@ -18,7 +18,7 @@ from apps.users.models import User
 
 class ReservationListCreateView(ListCreateAPIView):
     permission_classes = [IsAdmin | IsRenter | IsLessor]
-    authentication_classes = [JWTAuthentication]
+    authentication_classes = [CustomJWTAuthentication]
 
     def get_queryset(self):
         user: User = self.request.user
@@ -35,7 +35,7 @@ class ReservationListCreateView(ListCreateAPIView):
 
 
 class ReservationUpdateRetrieveDeleteView(RetrieveUpdateDestroyAPIView):
-    authentication_classes = [JWTAuthentication]
+    authentication_classes = [CustomJWTAuthentication]
 
     def get_queryset(self):
         pk: int = self.kwargs.get("pk")
