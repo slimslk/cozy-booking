@@ -4,5 +4,4 @@ from apps.reviews.views.review_views import ReviewCreateView, ReviewListForListi
 
 urlpatterns = [
     path('rate/', ReviewCreateView.as_view()),
-    path('reviews/', ReviewListForListing.as_view())
 ]

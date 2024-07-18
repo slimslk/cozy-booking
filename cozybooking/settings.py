@@ -52,7 +52,8 @@ INSTALLED_APPS = [
     'apps.security.apps.SecurityConfig',
     'apps.listings.apps.ListingsConfig',
     'apps.reservations.apps.ReservationsConfig',
-    'apps.reviews.apps.ReviewsConfig'
+    'apps.reviews.apps.ReviewsConfig',
+    'apps.listing_views.apps.ListingViewsConfig',
 ]
 
 MIDDLEWARE = [
@@ -143,6 +144,11 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': True,
+}
+
+SWAGGER_SETTINGS = {
+    'DEFAULT_INFO': 'cozybooking.urls',
+    'DEFAULT_AUTO_SCHEMA_CLASS': 'drf_yasg.inspectors.SwaggerAutoSchema',
 }
 
 # Internationalization

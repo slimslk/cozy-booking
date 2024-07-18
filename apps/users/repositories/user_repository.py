@@ -27,7 +27,7 @@ class UserRepository:
         return user
 
     def __get_users(self, *args, **kwargs) -> list[User] | User:
-        categories = User.objects.filter(**kwargs)
+        categories = User.objects.filter(is_deleted=False, **kwargs)
         if len(categories) < 2:
             return categories.first()
         return categories.all()

@@ -3,16 +3,17 @@ from typing import Any
 from rest_framework import serializers
 
 from apps.constants.error_messages import NOT_A_NUMBER, NOT_IN_APARTMENT_CHOICES
+from apps.listing_views.services.listing_search_services import ListingSearchService
+from apps.listing_views.services.listing_views_services import ListingViewsService
 from apps.listings.choices.appartment_type_choices import ApartmentTypeChoice
 from apps.listings.constants.filter_and_order_constants import (
     FILTER_LIST_AND_PAGINATION,
     ORDER_LIST,
-    CREATED_AT_DESC_RANK,
     ORDER_PARAMETER,
     APARTMENT_TYPE,
     VALUE_AS_NUMBER_LIST,
     PRICE_MIN,
-    PRICE_MAX
+    PRICE_MAX, PAGE, PAGE_SIZE, POPULAR_ORDER_LIST, DEFAULT_PAGE_SIZE, POPULAR_DESC_RANK
 )
 from apps.listings.dto.apartment_dto import ResponseApartmentDTO, RequestApartmentDTO
 from apps.listings.errors.listings_errors import ListingDataValidationError
@@ -27,19 +28,28 @@ from apps.utils.content_utils import check_and_update_entity_with_new_data_helpe
 
 class ListingService:
 
-    def __init__(self, listing_repository: ListingRepository = ListingRepository()):
+    def __init__(
+            self,
+            listing_repository: ListingRepository = ListingRepository(),
+            listing_views_service: ListingViewsService = ListingViewsService(),
+            listing_search_service: ListingSearchService = ListingSearchService(),
+    ):
         self.__listing_repository = listing_repository
+        self.__listing_views_service = listing_views_service
+        self.__listing_search_service = listing_search_service
 
     def get_all_apartments(self, *args, **kwargs) -> list[dict]:
         filters: dict[str, Any] = {}
-        order: str = ""
+
+        if not kwargs.get(ORDER_PARAMETER):
+            kwargs[ORDER_PARAMETER] = self.__get_popular_orders_request()
+
         if kwargs:
             filters = self.__get_filter(kwargs)
             order = self.__get_order(kwargs)
+
         if not filters:
             filters = self.__get_popular_filters_request()
-        if not order:
-            order = self.__get_popular_orders_request()
 
         apartments: list[Apartment] = self.get_apartment_as_model(filters=filters, order=order)
         apartments_response = [ResponseApartmentDTO(apartment).data for apartment in apartments]
@@ -59,8 +69,13 @@ class ListingService:
             apartment = self.__listing_repository.creat_apartment(apartment_data)
             return ResponseApartmentDTO(apartment)
 
-    def get_apartments_by_id(self, apartment_id: int) -> ResponseApartmentDTO:
+    def get_apartments_by_id(self, apartment_id: int, **kwargs) -> ResponseApartmentDTO:
         apartment = self.get_apartment_as_model(apartment_id=apartment_id)
+        user_id = kwargs.get('user_id')
+        view_data = {'listing': apartment.id}
+        if user_id:
+            view_data['user'] = user_id
+        self.__add_view_to_listing(view_data)
         content_utils.check_content_helper(apartment)
         apartment_response = ResponseApartmentDTO(apartment)
         return apartment_response
@@ -91,13 +106,17 @@ class ListingService:
         user_id = kwargs.get('user_id')
         filters = kwargs.get('filters')
         order = kwargs.get('order')
+
         if user_id:
             apartment = self.__listing_repository.get_all_apartment_by_user_id(user_id)
+
         elif apartment_id:
             apartment = self.__listing_repository.get_apartment_by_id(apartment_id)
+
         else:
             apartment = self.__listing_repository.get_all_apartments(**filters, order=order)
         content_utils.check_content_helper(apartment)
+
         return apartment
 
     def update_apartment(self, apartment: Apartment, updated_data: dict[str, Any]) -> Apartment:
@@ -131,29 +150,52 @@ class ListingService:
         return {}
 
     def __get_popular_orders_request(self) -> dict[str: Any]:
-        return CREATED_AT_DESC_RANK[1]
+        return POPULAR_DESC_RANK
 
     def __get_filter(self, request_parameters: dict[str, Any]) -> dict[str, Any]:
         listing_filter: dict[str, Any] = {}
+
+        page = request_parameters.pop(PAGE, ['1'])[0]
+        self.__check_is_number(page)
+        page_size = request_parameters.pop(PAGE_SIZE, [str(DEFAULT_PAGE_SIZE)])[0]
+        self.__check_is_number(page_size)
+
         for key, value in request_parameters.items():
+
             if key in FILTER_LIST_AND_PAGINATION:
+
                 if key in VALUE_AS_NUMBER_LIST:
                     self.__check_is_number(value[0])
+
                     if key == PRICE_MIN:
                         listing_filter['price__gte'] = value[0]
                         continue
                     if key == PRICE_MAX:
                         listing_filter['price__lte'] = value[0]
                         continue
+
                     listing_filter[key] = value[0]
+
                 elif key == APARTMENT_TYPE:
                     self.__check_is_in_apartment_choices(value[0])
                     listing_filter[key] = value[0]
+
                 else:
                     listing_filter[key] = value[0]
+        self.__add_key_words_to_db(listing_filter)
+
+        listing_filter[PAGE] = page
+        listing_filter[PAGE_SIZE] = page_size
+
+        if request_parameters.get('order') and request_parameters.get('order')[0] in POPULAR_ORDER_LIST:
+            del (request_parameters['order'])
+            filters = self.__create_filter_from_popular_search()
+            filters = [{attr['search_field']: attr['search_value']} for attr in filters]
+            listing_filter['popular'] = filters
+
         return listing_filter
 
-    def __get_order(self, request_parameters: dict[str, Any]) -> str:
+    def __get_order(self, request_parameters: dict[str, Any]) -> str | list[dict[str, str]]:
         for key, value in request_parameters.items():
             if key == ORDER_PARAMETER:
                 for order in ORDER_LIST:
@@ -172,3 +214,13 @@ class ListingService:
             raise ListingDataValidationError(
                 err={'err': NOT_IN_APARTMENT_CHOICES}
             )
+
+    def __create_filter_from_popular_search(self):
+        filters = self.__listing_search_service.get_popular_listing_searches()
+        return filters
+
+    def __add_view_to_listing(self, view_data: dict[str, int]):
+        self.__listing_views_service.add_view(**view_data)
+
+    def __add_key_words_to_db(self, filters: dict[str, str]):
+        self.__listing_search_service.add_listing_search(**filters)

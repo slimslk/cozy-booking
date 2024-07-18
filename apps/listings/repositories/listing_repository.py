@@ -1,13 +1,18 @@
 from typing import Any
 
-from django.db.models import Q
-
-from apps.listings.constants.filter_and_order_constants import DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE
-from apps.listings.errors.listings_errors import PageParameterError
+from apps.listings.constants.filter_and_order_constants import (
+    DEFAULT_PAGE_SIZE,
+    ORDER_PARAMETER,
+    PAGE,
+    PAGE_SIZE,
+)
+from apps.listings.filters.listing_filters import ListingFilter
 from apps.listings.models.apartment import Apartment
 
 
 class ListingRepository:
+
+    LISTING_FILTER = ListingFilter()
 
     def get_all_apartments(self, **kwargs) -> list[Apartment]:
         apartments = self.__get_apartments(is_active=True, **kwargs)
@@ -39,32 +44,18 @@ class ListingRepository:
         return apartment
 
     def __get_apartments(self, *args, **kwargs) -> list[Apartment] | Apartment:
-        order: str = kwargs.pop('order', '-created_at')
-        location: str | None = kwargs.pop('location', '')
-        search = kwargs.pop('search', '')
-        page_size = int(kwargs.pop('page_size', DEFAULT_PAGE_SIZE))
-        page = (int(kwargs.pop('page', 1)) - 1) * page_size
+        order: str | list[dict[str, str]] = ''
+        if ORDER_PARAMETER in kwargs.keys():
+            order = kwargs.pop(ORDER_PARAMETER)
+        page_size = int(kwargs.pop(PAGE_SIZE, DEFAULT_PAGE_SIZE))
+        page = (int(kwargs.pop(PAGE, 1)) - 1) * page_size
 
-        if page_size > MAX_PAGE_SIZE:
-            page_size = MAX_PAGE_SIZE
-        if page < 0:
-            raise PageParameterError()
+        instance = Apartment.objects
+        instance = self.LISTING_FILTER.add_filters_to_query(instance, **kwargs)
 
-        location_query = Q(address__city__icontains=location) | Q(address__land__icontains=location)
-        title_and_description_query = Q(title__icontains=search) | Q(description__icontains=search)
+        instance = self.LISTING_FILTER.add_sorting_to_query(instance, order=order)
+        instance = self.LISTING_FILTER.add_pagination_to_query(instance, page_size=page_size, page=page)
 
-        if location:
-            apartments = Apartment.objects.filter(
-                title_and_description_query,
-                location_query,
-                **kwargs
-            ).order_by(order)[page:page_size + page]
-        else:
-            apartments = Apartment.objects.filter(
-                title_and_description_query,
-                **kwargs
-            ).order_by(order)[page:page_size + page]
-
-        if len(apartments) < 2:
-            return apartments.first()
-        return apartments.all()
+        if len(instance) < 2:
+            return instance[0] if instance else None
+        return instance

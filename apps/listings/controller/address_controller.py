@@ -4,17 +4,17 @@ from rest_framework.permissions import SAFE_METHODS, AllowAny
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from apps.errors.abstract_base_error import AbstractBaseError
 from apps.listings.dto.address_dto import ResponseAddressDTO, AddressSerializer, RequestAddressDTO
 from apps.listings.services.address_service import AddressService
+from apps.security.authentications.authentication import CustomJWTAuthentication
 from apps.security.permissions.user_permission import IsAdmin, IsLessor
 
 
 class BaseAddressView(APIView):
     _address_service: AddressService = AddressService()
-    authentication_classes = [JWTAuthentication]
+    authentication_classes = [CustomJWTAuthentication]
 
 
 class ApartmentCRUDView(BaseAddressView):

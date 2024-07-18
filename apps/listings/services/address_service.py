@@ -36,16 +36,6 @@ class AddressService:
             if serializer.is_valid(raise_exception=True):
                 with transaction.atomic():
                     address: Address = self.get_or_create_address(serializer.validated_data)
-                    # updated_apartment_data = {
-                    #     'address': {
-                    #         "id": address.id,
-                    #         "land": address.land,
-                    #         "city": address.city,
-                    #         "street": address.street,
-                    #         "house_number": address.house_number,
-                    #         "postal_code": address.postal_code
-                    #     }
-                    # }
                     updated_apartment_data = {
                         'address': address.id
                     }

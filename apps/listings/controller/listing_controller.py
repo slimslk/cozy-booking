@@ -1,20 +1,21 @@
+from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, SAFE_METHODS
-from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from apps.errors.abstract_base_error import AbstractBaseError
 from apps.listings.dto.apartment_dto import ResponseApartmentDTO, RequestApartmentDTO
 from apps.listings.services.listing_service import ListingService
+from apps.security.authentications.authentication import CustomJWTAuthentication
 from apps.security.permissions.user_permission import IsAdmin, IsLessor
 
 
 class BaseApartmentView(APIView):
     _listing_service: ListingService = ListingService()
-    authentication_classes = [JWTAuthentication]
+    authentication_classes = [CustomJWTAuthentication]
 
 
 class ApartmentListCreateView(BaseApartmentView):
@@ -39,7 +40,20 @@ class ApartmentListCreateView(BaseApartmentView):
                 status=err.status_code
             )
 
-    @swagger_auto_schema(request_body=RequestApartmentDTO, )
+    @swagger_auto_schema(
+        request_body=RequestApartmentDTO,
+        tags=['Listings'],
+        # manual_parameters=[
+        #  openapi.Parameter(
+        #      'search', openapi.IN_QUERY,
+        #      description="Search by name", type=openapi.TYPE_STRING
+        #  ),
+        #  openapi.Parameter(
+        #      'ordering', openapi.IN_QUERY,
+        #      description="Ordering by created_at", type=openapi.TYPE_STRING
+        #  ),
+        # ]
+    )
     def post(self, request: Request) -> Response:
         try:
             apartment_data = request.data
@@ -65,7 +79,8 @@ class ApartmentRetrieveUpdateDelete(BaseApartmentView):
 
     def get(self, request: Request, apartment_id: int) -> Response:
         try:
-            apartment = self._listing_service.get_apartments_by_id(apartment_id)
+            user_id = self.request.user.id
+            apartment = self._listing_service.get_apartments_by_id(apartment_id, user_id=user_id)
             return Response(
                 data=apartment.data,
                 status=status.HTTP_200_OK
