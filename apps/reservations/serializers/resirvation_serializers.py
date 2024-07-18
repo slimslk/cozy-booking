@@ -71,7 +71,7 @@ class ReservationUpdateSerializer(serializers.ModelSerializer):
         if user.role == RoleChoices.LESSOR.name and status not in [
             StatusChoices.REJECTED.name,
             StatusChoices.CONFIRMED.name,
-            StatusChoices.CHECKED_IN,
+            StatusChoices.CHECKED_IN.name,
         ]:
             raise serializers.ValidationError({'err': LESSOR_STATUS})
 

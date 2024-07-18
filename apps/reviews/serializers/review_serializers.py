@@ -17,7 +17,9 @@ class ReviewCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         reservation_id = validated_data.get('reservation_id')
         user = validated_data.get('user')
-        reservation: Reservation = Reservation.objects.get(pk=reservation_id)
+        reservation: Reservation = Reservation.objects.filter(pk=reservation_id).first()
+        if not reservation:
+            raise serializers.ValidationError("NO_CONTENT_FOUND")
         validated_data['listing'] = reservation.listing
         if reservation.user_id != user.id:
             raise serializers.ValidationError({'err': PERMISSION_DENIED})
